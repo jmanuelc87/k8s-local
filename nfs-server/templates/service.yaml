@@ -4,7 +4,7 @@ metadata:
   name: nfs-server-service
   namespace: nfs-server
   annotations:
-    metallb.io/loadBalancerIPs: 192.168.0.14
+    metallb.io/address-pool:: default-pool
 spec:
   type: LoadBalancer
   selector:
