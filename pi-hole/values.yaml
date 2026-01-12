@@ -1,0 +1,17 @@
+persistentVolumeClaim:
+  enabled: true
+
+ingress:
+  enabled: true
+
+adminPassword: adminPiHole
+
+serviceWeb:
+  annotations:
+    metallb.io/address-pool: default-pool
+  type: LoadBalancer
+
+serviceDns:
+  annotations:
+    metallb.io/address-pool: default-pool
+  type: LoadBalancer
