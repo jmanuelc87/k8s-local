@@ -17,7 +17,12 @@ spec:
     spec:
       containers:
         - name: nfs-server
-          image: erichough/nfs-server:latest
+          image: itsthenetwork/nfs-server-alpine:latest
+
+          env:
+            - name: SHARED_DIRECTORY
+              value: /cameras
+
           ports:
             - name: nfsv4
               containerPort: 2049
@@ -27,7 +32,8 @@ spec:
               name: nfs-server-mount
 
           securityContext:
-            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN", "SETPCAP"]
 
           resources:
             requests:
