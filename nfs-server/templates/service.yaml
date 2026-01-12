@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nfs-server-service
+  namespace: nfs-server
+  annotations:
+    metallb.universe.tf/address-pool: default-pool
+spec:
+  type: LoadBalancer
+  selector:
+    app: nfs-server
+  ports:
+    - protocol: TCP
+      port: 2049
+      targetPort: 2049
+      name: NFSv4
