@@ -4,8 +4,6 @@ persistentVolumeClaim:
 ingress:
   enabled: true
 
-adminPassword: adminPiHole
-
 serviceWeb:
   annotations:
     metallb.io/address-pool: default-pool
