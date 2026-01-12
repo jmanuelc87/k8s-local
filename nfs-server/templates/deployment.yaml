@@ -33,8 +33,7 @@ spec:
             limits:
               memory: "4096Mi"
               cpu: "4"
-
-    volumes:
-      - name: nfs-server-mount
-        persistentVolumeClaim:
-          claimName: nfs-server-pvc
+      volumes:
+        - name: nfs-server-mount
+          persistentVolumeClaim:
+            claimName: nfs-server-pvc
