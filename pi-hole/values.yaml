@@ -5,11 +5,13 @@ ingress:
   enabled: true
 
 serviceWeb:
+  type: LoadBalancer
+  loadBalancerIP: 192.168.0.6
   annotations:
-    metallb.io/loadBalancerIPs: 192.168.0.6
     metallb.universe.tf/allow-shared-ip: pihole-svc
 
 serviceDns:
+  type: LoadBalancer
+  loadBalancerIP: 192.168.0.6
   annotations:
-    metallb.io/loadBalancerIPs: 192.168.0.6
     metallb.universe.tf/allow-shared-ip: pihole-svc
