@@ -19,7 +19,7 @@ spec:
         - name: nfs-server
           image: erichough/nfs-server:latest
           ports:
-            - name: NFSv4
+            - name: nfsv4
               protocol: TCP
               port: 2049
               targetPort: 2049
