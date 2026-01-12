@@ -10,6 +10,6 @@ sserviceTCP:
     metallb.universe.tf/allow-shared-ip: pihole-svc
 
 serviceUDP:
-  loadBalancerIP: 192.168.0.7
+  loadBalancerIP: 192.168.0.6
   annotations:
     metallb.universe.tf/allow-shared-ip: pihole-svc
