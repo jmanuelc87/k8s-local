@@ -20,13 +20,11 @@ spec:
           image: erichough/nfs-server:latest
           ports:
             - name: nfsv4
-              protocol: TCP
-              port: 2049
-              targetPort: 2049
+              containerPort: 2049
 
           volumeMounts:
             - mountPath: /cameras
-              name: nfs-server
+              name: nfs-server-mount
 
           resources:
             requests:
@@ -37,6 +35,6 @@ spec:
               cpu: "4"
 
     volumes:
-      - name: nfs-server
+      - name: nfs-server-mount
         persistentVolumeClaim:
           claimName: nfs-server-pvc
