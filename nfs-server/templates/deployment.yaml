@@ -10,8 +10,6 @@ spec:
       app: nfs-server
   template:
     metadata:
-      annotations:
-
       labels:
         app: nfs-server
     spec:
@@ -25,6 +23,7 @@ spec:
 
           ports:
             - containerPort: 2049
+              name: nfsv4
 
           volumeMounts:
             - mountPath: /cameras
