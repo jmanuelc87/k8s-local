@@ -23,7 +23,14 @@ spec:
 
           ports:
             - containerPort: 2049
-              name: nfsv4
+              name: nfsd
+
+            - containerPort: 111
+              name: mapper
+
+            - containerPort: 32767
+            - containerPort: 32765
+            - containerPort: 32766
 
           volumeMounts:
             - mountPath: /cameras
