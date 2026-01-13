@@ -14,15 +14,19 @@ spec:
     - protocol: TCP
       port: 2049
       targetPort: 2049
+      name: nfs1
 
     - protocol: UDP
       port: 2049
       targetPort: 2049
+      name: nfs2
 
     - protocol: TCP
       port: 111
       targetPort: 111
+      name: nfs3
 
     - protocol: UDP
       port: 111
       targetPort: 111
+      name: nfs4
