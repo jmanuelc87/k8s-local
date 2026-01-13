@@ -1,3 +1,6 @@
+ingress:
+  enabled: true
+
 persistentVolumeClaim:
   enabled: true
 
