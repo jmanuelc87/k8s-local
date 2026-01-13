@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frigate-service
+  namespace: frigate
+  annotations:
+    metallb.universe.tf/address-pool: default-pool
+spec:
+  type: LoadBalancer
+  selector:
+    app: frigate
+  ports:
+    - protocol: TCP
+      port: 8971
+      targetPort: 8971
+      name: webui
+    - protocol: TCP
+      port: 1984
+      targetPort: 1984
+      name: go2rtc
+    - protocol: TCP
+      port: 8554
+      targetPort: 8554
+      name: rtsp-feeds
+    - protocol: UDP
+      port: 8555
+      targetPort: 8555
+      name: webrtc-udp
+    - protocol: TCP
+      port: 8555
+      targetPort: 8555
+      name: webrtc-tcp

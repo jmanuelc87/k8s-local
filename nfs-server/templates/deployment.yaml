@@ -21,6 +21,9 @@ spec:
             - name: SHARED_DIRECTORY
               value: /cameras
 
+            - name: PERMITTED
+              value: 192.168.0.1/24
+
           ports:
             - containerPort: 2049
               name: nfsd
@@ -39,9 +42,6 @@ spec:
             requests:
               memory: "256Mi"
               cpu: "2"
-            limits:
-              memory: "512Mi"
-              cpu: "4"
 
       volumes:
         - name: nfs-server-mount
