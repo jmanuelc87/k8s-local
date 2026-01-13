@@ -19,7 +19,7 @@ spec:
 
           env:
             - name: SHARED_DIRECTORY
-              value: /home/cameras
+              value: /cameras
 
           ports:
             - containerPort: 2049
@@ -29,7 +29,7 @@ spec:
               name: mapper
 
           volumeMounts:
-            - mountPath: /home/cameras
+            - mountPath: /cameras
               name: nfs-server-mount
 
           securityContext:
