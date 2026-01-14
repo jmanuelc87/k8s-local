@@ -1,0 +1,8 @@
+dind:
+  enabled: false
+pluginDefaults:
+  - type: io.kestra.plugin.scripts
+    forced: true
+    values:
+      taskRunner:
+        type: io.kestra.plugin.ee.kubernetes.runner.Kubernetes
