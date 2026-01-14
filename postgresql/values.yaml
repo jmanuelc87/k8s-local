@@ -1,0 +1,6 @@
+auth:
+  postgresPassword: dummy
+primary:
+  persistence:
+    enabled: true
+    size: 50Gi
