@@ -1,8 +1,76 @@
+deployments:
+  webserver:
+    enabled: true
+  executor:
+    enabled: true
+  indexer:
+    enabled: true
+  scheduler:
+    enabled: true
+  worker:
+    enabled: true
+  standalone:
+    enabled: true
+
 dind:
-  enabled: false
-pluginDefaults:
-  - type: io.kestra.plugin.scripts
-    forced: true
-    values:
-      taskRunner:
-        type: io.kestra.plugin.ee.kubernetes.runner.Kubernetes
+  # -- Enable Docker-in-Docker (dind) sidecar.
+  # @section -- kestra dind
+  enabled: true
+  # -- Dind mode (rootless or insecure).
+  # @section -- kestra dind
+  mode: 'rootless'
+  base:
+    # -- Rootless dind configuration.
+    # @section -- kestra dind rootless
+    rootless:
+      image:
+        repository: docker
+        pullPolicy: IfNotPresent
+        tag: dind-rootless
+      securityContext:
+        privileged: true
+        runAsUser: 1000
+        runAsGroup: 1000
+      args:
+        - --log-level=fatal
+        - --group=1000
+    # -- Insecure dind configuration (privileged).
+    # @section -- kestra dind insecure
+    insecure:
+      image:
+        repository: docker
+        pullPolicy: IfNotPresent
+        tag: dind-rootless
+      securityContext:
+        privileged: true
+        runAsUser: 0
+        runAsGroup: 0
+        allowPrivilegeEscalation: true
+        capabilities:
+          add:
+            - SYS_ADMIN
+            - NET_ADMIN
+            - DAC_OVERRIDE
+            - SETUID
+            - SETGID
+      args:
+        - '--log-level=fatal'
+
+configurations:
+  application:
+    kestra:
+      queue:
+        type: h2
+      repository:
+        type: h2
+      storage:
+        type: local
+        local:
+          basePath: "/app/storage"
+
+    datasources:
+      h2:
+        url: jdbc:h2:mem:public;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+        username: kestra
+        password: kestra
+        driverClassName: org.h2.Driver
