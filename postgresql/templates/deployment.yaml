@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql-server
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql-server
+  template:
+    metadata:
+      labels:
+        app: postgresql-server
+    spec:
+      containers:
+        - name: postgresql-server
+          image: postgres:18.1
+
+          env:
+            - name: POSTGRES_PASSWORD
+              value: "{{ .Values.password }}"
+
+            - name: POSTGRES_USER
+              value: "{{ .Values.username }}"
+            
+            - name: PGDATA
+              value: /var/lib/postgresql/18/docker
+
+          ports:
+            - containerPort: 5432
+              name: postgres
+
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/18/docker
+              name: postgres-server-mount
+
+          securityContext:
+            privileged: True
+
+          resources:
+            requests:
+              memory: "1G"
+              cpu: "2"
+
+      volumes:
+        - name: postgres-server-mount
+          persistentVolumeClaim:
+            claimName: postgres-server-pvc
