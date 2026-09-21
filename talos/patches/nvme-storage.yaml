@@ -1,0 +1,8 @@
+# User volume configuration with an additional NVMe disk
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: fast-storage
+provisioning:
+  diskSelector:
+    match: disk.dev_path == '/dev/nvme0n1'
+  minSize: 250GB

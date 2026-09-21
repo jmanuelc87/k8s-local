@@ -1,0 +1,10 @@
+machine:
+  network:
+    # hostname: talos-control-plane
+    interfaces:
+      - interface: ens18
+        addresses:
+          - 192.168.1.3/22
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.0.1

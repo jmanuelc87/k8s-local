@@ -1,0 +1,10 @@
+machine:
+  network:
+    # hostname: worker-02
+    interfaces:
+      - interface: ens18
+        addresses:
+          - 192.168.1.5/22
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.0.1
