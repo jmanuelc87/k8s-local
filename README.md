@@ -5,14 +5,12 @@ This repo holds several projects to be deployed in my local cluster.
 ### Projects
 
 1. [Base](./base/) for the cluster foundations: storage (Longhorn, NFS) and metrics-server.
-2. [NFS-Server](./nfs-server/) for storing images and videos of my security cameras.
-3. [PI-Hole](./pi-hole/) for filtering ads.
-4. [Frigate](./frigate/) for accessing security cameras.
-5. [Kestra](./kestra/) for implementing data pipelines.
+2. [csi-driver-nfs](./csi-driver-nfs/) for installing the NFS CSI driver in the cluster.
+3. [Frigate](./frigate/) for accessing security cameras.
+4. [MetalLB](./metallb/) for the load balancer IP address pool configuration.
+5. [PI-Hole](./pi-hole/) for filtering ads.
 6. [PostgreSQL](./postgresql/) for provisioning postgresql databases.
 7. [Talos](./talos/) for creating a talos k8s cluster, only the patches are stored.
-8. [Base](./base/) for creating metrics-server, longhorn and NFS server.
-9. [csi-driver-nfs](./csi-driver-nfs/) for installing the CSI driver in the cluster.
 
 #### MetalLB (Load Balancer)
 
