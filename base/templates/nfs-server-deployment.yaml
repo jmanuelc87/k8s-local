@@ -1,0 +1,75 @@
+{{- if .Values.nfsServer.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-server
+  namespace: {{ .Values.nfsNamespace | default "nfs-storage" }}
+  labels:
+    app: nfs-server
+spec:
+  replicas: 1
+  # The pod is pinned to one node and uses hostNetwork, so a rolling update
+  # can never start the new pod while the old one holds the host ports.
+  strategy:
+    type: Recreate
+    rollingUpdate: null
+  selector:
+    matchLabels:
+      app: nfs-server
+  template:
+    metadata:
+      labels:
+        app: nfs-server
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/nfs-server-configmap.yaml") . | sha256sum }}
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: "{{ .Values.nfsServer.nodeName }}"
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: nfs-server
+        image: {{ .Values.nfsServer.image }}:{{ .Values.nfsServer.imageTag }}
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh", "/opt/nfs/start.sh"]
+        securityContext:
+          capabilities:
+            add:
+              # open_by_handle_at() used by the Ganesha VFS backend
+              - DAC_READ_SEARCH
+              # raise RLIMIT_NOFILE
+              - SYS_RESOURCE
+        ports:
+        - name: nfs
+          containerPort: 2049
+          protocol: TCP
+        readinessProbe:
+          tcpSocket:
+            port: nfs
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: nfs
+          initialDelaySeconds: 30
+          periodSeconds: 20
+        volumeMounts:
+        - name: storage
+          mountPath: /export
+        - name: config
+          mountPath: /etc/ganesha/ganesha.conf
+          subPath: ganesha.conf
+          readOnly: true
+        - name: config
+          mountPath: /opt/nfs/start.sh
+          subPath: start.sh
+          readOnly: true
+      volumes:
+      - name: storage
+        hostPath:
+          path: {{ .Values.nfsServer.persistence.path }}
+          type: DirectoryOrCreate
+      - name: config
+        configMap:
+          name: nfs-server-config
+{{- end }}

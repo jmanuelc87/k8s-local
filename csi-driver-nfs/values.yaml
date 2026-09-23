@@ -1,0 +1,20 @@
+# Values for the kubernetes-csi/csi-driver-nfs Helm chart.
+# Installed as its own release in kube-system (see README), because the node
+# driver needs privileged access and Talos enforces the PodSecurity "baseline"
+# profile on every namespace except kube-system.
+
+controller:
+  replicas: 1
+  runOnControlPlane: false
+  # The cluster has no VolumeSnapshot CRDs, and NFS "snapshots" are tar
+  # archives of the share, so leave the snapshotter sidecar off.
+  enableSnapshotter: false
+
+externalSnapshotter:
+  enabled: false
+
+storageClass:
+  # The nfs-csi StorageClass is defined in the base chart
+  # (base/templates/nfs-storageclass.yaml) and points at the in-cluster
+  # NFS-Ganesha server.
+  create: false

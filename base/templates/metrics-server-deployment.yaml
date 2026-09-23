@@ -1,0 +1,67 @@
+{{- if .Values.metricsServer.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-server
+  namespace: {{ .Values.metricsServer.namespace | default "kube-system" }}
+  labels:
+    k8s-app: metrics-server
+spec:
+  selector:
+    matchLabels:
+      k8s-app: metrics-server
+  replicas: {{ .Values.metricsServer.replicas | default 1 }}
+  template:
+    metadata:
+      labels:
+        k8s-app: metrics-server
+    spec:
+      serviceAccountName: metrics-server
+      containers:
+      - name: metrics-server
+        image: {{ .Values.metricsServer.image }}:{{ .Values.metricsServer.imageTag }}
+        imagePullPolicy: IfNotPresent
+        args:
+{{- range .Values.metricsServer.args }}
+        - {{ . | quote }}
+{{- end }}
+        ports:
+        - name: https
+          containerPort: 4443
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /livez
+            port: https
+            scheme: HTTPS
+          initialDelaySeconds: 0
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: https
+            scheme: HTTPS
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits:
+            cpu: 100m
+            memory: 200Mi
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      nodeSelector:
+        kubernetes.io/os: linux
+      priorityClassName: system-cluster-critical
+      serviceAccountName: metrics-server
+{{- end }}

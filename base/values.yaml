@@ -1,0 +1,92 @@
+metricsServer:
+  enabled: true
+  namespace: "kube-system"
+  image: "registry.k8s.io/metrics-server/metrics-server"
+  imageTag: "v0.6.4"
+  replicas: 1
+  args:
+    - "--secure-port=4443"
+    - "--cert-dir=/tmp"
+    - "--kubelet-insecure-tls=true"
+    - "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname"
+
+longhornNamespace: "longhorn-system"
+
+longhorn:
+  namespaceOverride: "longhorn-system"
+  enabled: true
+  persistence:
+    defaultClass: true
+    defaultClassStored: true
+    reclaimPolicy: Delete
+    migratable: false
+    recurringJobSelector:
+      isGroup: false
+  longhornManager:
+    log:
+      level: Info
+  longhornDriver:
+    tolerations: []
+  preUpgradeChecker:
+    jobInitImage: ""
+  defaultSettings:
+    defaultDataPath: "/var/mnt/fast-storage"
+  service:
+    ui:
+      type: LoadBalancer
+      loadBalancerIP: "192.168.1.10"
+  storageQuota: "500Gi"
+  pvcQuota: "50"
+  limits:
+    container:
+      memory: "2Gi"
+      cpu: "2000m"
+    pod:
+      memory: "4Gi"
+      cpu: "4000m"
+
+nfsNamespace: "nfs-storage"
+
+# Userspace NFS server (NFS-Ganesha) pinned to one node and exposed on that
+# node's IP via hostNetwork. Talos has no kernel nfsd module, so a kernel-based
+# NFS server image cannot work here. The image below is multi-arch (amd64/arm64).
+nfsServer:
+  enabled: true
+  nodeName: "turingpi-w03"
+  image: "registry.k8s.io/sig-storage/nfs-provisioner"
+  imageTag: "v4.0.8"
+  # Host directory that is exported. Clients address it by nfs.share below,
+  # which is used as the NFSv4 pseudo path.
+  persistence:
+    size: "480Gi"
+    path: "/var/mnt/cold-storage"
+  # NFSv4 grace period in seconds (0-180). Clients reconnecting after a server
+  # restart must reclaim their locks within this window.
+  gracePeriod: 90
+  logLevel: "EVENT"
+
+nfs:
+  enabled: true
+  server: "192.168.1.5"
+  share: "/var/mnt/cold-storage"
+  storageClass:
+    name: "nfs-csi"
+    provisioner: "nfs.csi.k8s.io"
+    reclaimPolicy: Delete
+    volumeBindingMode: Immediate
+    mountPermissions: "0755"
+    mountOptions:
+      - nfsvers=4.2
+      - hard
+      - rsize=1048576
+      - wsize=1048576
+  persistentVolume:
+    name: "nfs-data"
+    size: "480Gi"
+    path: "/var/mnt/cold-storage"
+    reclaimPolicy: Retain
+    mountOptions:
+      - nfsvers=4.2
+      - hard
+      - rsize=1048576
+      - wsize=1048576

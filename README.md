@@ -4,12 +4,15 @@ This repo holds several projects to be deployed in my local cluster.
 
 ### Projects
 
-1. [NFS-Server](./nfs-server/) for storing images and videos of my security cameras
-2. [PI-Hole](./pi-hole/) for filtering ads
-3. [Frigate](./frigate/) for accessing security cameras
-4. [Kestra](./kestra/) for implementing data pipelines
-5. [PostgreSQL](./postgresql/) for provisioning postgresql databases
-6. [Talos](./talos/) for creating a talos k8s cluster, only the patches are stored.
+1. [Base](./base/) for the cluster foundations: storage (Longhorn, NFS) and metrics-server.
+2. [NFS-Server](./nfs-server/) for storing images and videos of my security cameras.
+3. [PI-Hole](./pi-hole/) for filtering ads.
+4. [Frigate](./frigate/) for accessing security cameras.
+5. [Kestra](./kestra/) for implementing data pipelines.
+6. [PostgreSQL](./postgresql/) for provisioning postgresql databases.
+7. [Talos](./talos/) for creating a talos k8s cluster, only the patches are stored.
+8. [Base](./base/) for creating metrics-server, longhorn and NFS server.
+9. [csi-driver-nfs](./csi-driver-nfs/) for installing the CSI driver in the cluster.
 
 #### MetalLB (Load Balancer)
 
@@ -29,10 +32,34 @@ helm install metallb metallb/metallb \
 # Label the metallb-system namespace to allow privileged pod security
 kubectl label namespace metallb-system \
   pod-security.kubernetes.io/enforce=privileged \
-  pod-security.kubernetes.io/audit=restricted \
-  pod-security.kubernetes.io/warn=restricted \
+  pod-security.kubernetes.io/audit=privileged \
+  pod-security.kubernetes.io/warn=privileged \
   pod-security.kubernetes.io/enforce-version=latest
 
 # Configure IP address pool
 kubectl apply -f ./metallb/config.yaml
 ```
+
+#### NFS CSI driver (dynamic NFS volumes)
+
+The `nfs-csi` StorageClass in the base chart needs the
+[csi-driver-nfs](https://github.com/kubernetes-csi/csi-driver-nfs) driver. It is
+**not** a dependency of the base chart because its node DaemonSet needs
+`hostNetwork`, `privileged` and hostPath mounts, and Talos enforces the
+PodSecurity `baseline` profile on every namespace except `kube-system`. A Helm
+subchart can only deploy into the release namespace, so the driver is installed
+as its own release in `kube-system` instead.
+
+**Installation:**
+
+```bash
+helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+helm repo update
+helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
+  --namespace kube-system \
+  --version 4.13.4 \
+  -f ./csi-driver-nfs/values.yaml
+```
+
+Claims on the `nfs-csi` class get their own subdirectory on the NFS server's
+cold-storage share.

@@ -1,0 +1,19 @@
+{{- if .Values.nfs.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.nfs.persistentVolume.name | default "nfs-data" }}
+spec:
+  capacity:
+    storage: {{ .Values.nfs.persistentVolume.size | default "100Gi" }}
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: {{ .Values.nfs.server | quote }}
+    path: {{ .Values.nfs.persistentVolume.path | quote }}
+  persistentVolumeReclaimPolicy: {{ .Values.nfs.persistentVolume.reclaimPolicy | default "Retain" }}
+{{- if .Values.nfs.persistentVolume.mountOptions }}
+  mountOptions:
+{{- toYaml .Values.nfs.persistentVolume.mountOptions | nindent 4 }}
+{{- end }}
+{{- end }}

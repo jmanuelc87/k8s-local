@@ -1,0 +1,18 @@
+{{- if .Values.nfs.enabled }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.nfs.storageClass.name | default "nfs-csi" }}
+provisioner: {{ .Values.nfs.storageClass.provisioner | default "nfs.csi.k8s.io" }}
+allowVolumeExpansion: true
+reclaimPolicy: {{ .Values.nfs.storageClass.reclaimPolicy | default "Delete" }}
+volumeBindingMode: {{ .Values.nfs.storageClass.volumeBindingMode | default "Immediate" }}
+parameters:
+  server: {{ .Values.nfs.server | quote }}
+  share: {{ .Values.nfs.share | quote }}
+  mountPermissions: {{ .Values.nfs.storageClass.mountPermissions | default "0755" | quote }}
+{{- if .Values.nfs.storageClass.mountOptions }}
+mountOptions:
+{{- toYaml .Values.nfs.storageClass.mountOptions | nindent 2 }}
+{{- end }}
+{{- end }}

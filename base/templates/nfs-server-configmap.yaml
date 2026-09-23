@@ -1,0 +1,61 @@
+{{- if .Values.nfsServer.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nfs-server-config
+  namespace: {{ .Values.nfsNamespace | default "nfs-storage" }}
+  labels:
+    app: nfs-server
+data:
+  ganesha.conf: |
+    NFS_CORE_PARAM {
+        # NFSv4 only: no rpcbind, mountd, NLM or rquota needed.
+        Protocols = 4;
+        NFS_Port = 2049;
+        Enable_NLM = false;
+        Enable_RQUOTA = false;
+    }
+
+    NFSV4 {
+        Grace_Period = {{ .Values.nfsServer.gracePeriod | default 90 }};
+        RecoveryBackend = fs;
+        # Send and accept numeric uid/gid instead of user@domain names. The
+        # container has no idmap domain, so name mapping would squash every
+        # owner to nobody (4294967294).
+        Only_Numeric_Owners = true;
+    }
+
+    EXPORT_DEFAULTS {
+        Access_Type = RW;
+        Squash = No_Root_Squash;
+        SecType = sys;
+        Protocols = 4;
+        Transports = TCP;
+    }
+
+    EXPORT {
+        Export_Id = 1;
+        # Container mount of the host directory {{ .Values.nfsServer.persistence.path }}.
+        Path = /export;
+        # NFSv4 clients mount by pseudo path. This matches nfs.share so the
+        # StorageClass and PersistentVolume keep working unchanged.
+        Pseudo = {{ .Values.nfs.share | quote }};
+        FSAL {
+            Name = VFS;
+        }
+    }
+
+    LOG {
+        Default_Log_Level = {{ .Values.nfsServer.logLevel | default "EVENT" }};
+    }
+
+  start.sh: |
+    #!/bin/sh
+    set -eu
+    mkdir -p /var/lib/nfs/ganesha /var/run/dbus /run/ganesha
+    # dbus is only used for ganesha's admin interface; failure is not fatal.
+    dbus-daemon --system --nopidfile 2>/dev/null || echo "dbus-daemon not started (ignored)"
+    # rpcbind is optional for NFSv4-only servers; registration failures are non-fatal.
+    rpcbind 2>/dev/null || echo "rpcbind not started (ignored)"
+    exec ganesha.nfsd -F -L /dev/stderr -f /etc/ganesha/ganesha.conf -p /var/run/ganesha.pid
+{{- end }}

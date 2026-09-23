@@ -1,0 +1,17 @@
+{{- if .Values.metricsServer.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-server
+  namespace: {{ .Values.metricsServer.namespace | default "kube-system" }}
+  labels:
+    k8s-app: metrics-server
+spec:
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 4443
+  selector:
+    k8s-app: metrics-server
+{{- end }}

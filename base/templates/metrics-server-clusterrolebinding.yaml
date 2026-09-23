@@ -1,0 +1,45 @@
+{{- if .Values.metricsServer.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:metrics-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:metrics-server
+subjects:
+- kind: ServiceAccount
+  name: metrics-server
+  namespace: {{ .Values.metricsServer.namespace | default "kube-system" }}
+---
+# Lets metrics-server delegate authentication/authorization of incoming
+# requests to the kube-apiserver (TokenReview / SubjectAccessReview).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: metrics-server:system:auth-delegator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: metrics-server
+  namespace: {{ .Values.metricsServer.namespace | default "kube-system" }}
+---
+# Lets metrics-server read the extension-apiserver-authentication configmap
+# in kube-system, which it needs at startup to load the request-header CA.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: metrics-server-auth-reader
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+- kind: ServiceAccount
+  name: metrics-server
+  namespace: {{ .Values.metricsServer.namespace | default "kube-system" }}
+{{- end }}
